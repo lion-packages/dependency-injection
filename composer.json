@@ -1,5 +1,6 @@
 {
-    "name": "lion/package-template",
+    "name": "lion/dependency-injection",
+    "description": "Container for dependency injection with DI-PHP",
     "type": "library",
     "license": "MIT",
     "autoload": {
