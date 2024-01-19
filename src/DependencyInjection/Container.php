@@ -6,7 +6,7 @@ namespace Lion\DependencyInjection;
 
 use DI\Container as DIContainer;
 use DI\ContainerBuilder;
-use LionHelpers\Str;
+use Lion\Helpers\Str;
 use ReflectionClass;
 use ReflectionParameter;
 

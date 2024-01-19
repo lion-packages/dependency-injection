@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests;
 
 use DI\Container as DIContainer;
-use LionHelpers\Str;
 use Lion\DependencyInjection\Container;
-use LionTest\Test;
+use Lion\Helpers\Str;
+use Lion\Test\Test;
 use ReflectionParameter;
 use Tests\Provider\CustomClass;
 use Tests\Provider\FactoryProvider;
