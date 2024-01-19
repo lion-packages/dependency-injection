@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Lion\DependencyInjection;
 
+use Closure;
 use DI\Container as DIContainer;
 use DI\ContainerBuilder;
 use Lion\Helpers\Str;
 use ReflectionClass;
+use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionParameter;
 
@@ -49,7 +51,7 @@ class Container
         return $this->str->of("{$namespace}{$splitFile[1]}")->replace("/", "\\")->replace('.php', '')->trim()->get();
     }
 
-    private function getParameters(ReflectionMethod $method, array $params = []): array
+    private function getParameters(ReflectionMethod|ReflectionFunction $method, array $params = []): array
     {
         $args = [];
 
@@ -73,6 +75,13 @@ class Container
         $method = (new ReflectionClass($object))->getMethod($method);
 
         return $method->invoke($object, ...$this->getParameters($method, $params));
+    }
+
+    public function injectDependenciesCallback(Closure $closure, array $params = []): mixed
+    {
+        $method = new ReflectionFunction($closure);
+
+        return $method->invoke(...$this->getParameters($method, $params));
     }
 
     public function injectDependencies(object $object, array $params = []): object

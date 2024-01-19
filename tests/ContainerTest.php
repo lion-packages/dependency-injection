@@ -113,6 +113,18 @@ class ContainerTest extends Test
         $this->assertSame(self::STR, $factoryProvider->getStr());
     }
 
+    public function testInjectDependenciesCallback(): void
+    {
+        /** @var FactoryProvider $factoryProvider */
+        $factoryProvider = $this->container->injectDependenciesCallback(
+            fn(FactoryProvider $factoryProvider, string $str): FactoryProvider => $factoryProvider->setStr($str),
+            ['str' => self::STR]
+        );
+
+        $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
+        $this->assertSame(self::STR, $factoryProvider->getStr());
+    }
+
     public function testInjectDependencies(): void
     {
         /** @var CustomClass $customClass */
