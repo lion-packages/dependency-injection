@@ -42,38 +42,47 @@ class Container
         return $files;
     }
 
-    public function getNamespace(string $file, string $namespace, string $split): string
+    public function getNamespace(string $file, string $namespace, string $split = '/'): string
     {
         $splitFile = explode($split, $file);
 
         return $this->str->of("{$namespace}{$splitFile[1]}")->replace("/", "\\")->replace('.php', '')->trim()->get();
     }
 
-    private function getParameters(ReflectionMethod $method): array
+    private function getParameters(ReflectionMethod $method, array $params = []): array
     {
-        return array_map(
-            fn($parameter) => $this->container->get($this->getParameterClassName($parameter)),
-            $method->getParameters()
-        );
+        $args = [];
+
+        foreach ($method->getParameters() as $parameter) {
+            if ($parameter->isDefaultValueAvailable()) {
+                $args[] = $parameter->getDefaultValue();
+            } else {
+                if (!empty($params[$parameter->getName()])) {
+                    $args[] = $params[$parameter->getName()];
+                } else {
+                    $args[] = $this->container->get($this->getParameterClassName($parameter));
+                }
+            }
+        }
+
+        return $args;
     }
 
-    public function injectDependenciesMethod(object $object, string $method): mixed
+    public function injectDependenciesMethod(object $object, string $method, array $params = []): mixed
     {
         $method = (new ReflectionClass($object))->getMethod($method);
 
-        return $method->invoke($object, ...$this->getParameters($method));
+        return $method->invoke($object, ...$this->getParameters($method, $params));
     }
 
-    public function injectDependencies(object $object): object
+    public function injectDependencies(object $object, array $params = []): object
     {
-        $reflectionClass = new ReflectionClass($object);
-
-        foreach ($reflectionClass->getMethods() as $method) {
+        foreach ((new ReflectionClass($object))->getMethods() as $method) {
             $docDocument = $method->getDocComment();
 
             if (is_string($docDocument)) {
                 if ((bool) preg_match('/@required/', $docDocument)) {
-                    $method->invoke($object, ...$this->getParameters($method));
+                    $method->invoke($object, ...$this->getParameters($method, $params));
                 }
             }
         }

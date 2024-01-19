@@ -15,6 +15,7 @@ use Tests\Provider\FactoryProvider;
 
 class ContainerTest extends Test
 {
+    const STR = 'test';
     const FOLDER = './tests/';
     const PATH_FILE = './Provider/CustomClass.php';
     const FILES = [
@@ -59,24 +60,57 @@ class ContainerTest extends Test
 
     public function testGetParameters(): void
     {
-        $class = new class {
-            public function exampleMethod(FactoryProvider $factoryProvider): FactoryProvider
-            {
-                return $factoryProvider;
-            }
-        };
-
-        $parameters = $this->getPrivateMethod('getParameters', [new ReflectionMethod($class, 'exampleMethod')]);
+        $parameters = $this->getPrivateMethod(
+            'getParameters',
+            [new ReflectionMethod(new CustomClass(), 'setFactoryProvider')
+        ]);
 
         $this->assertIsArray($parameters);
         $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
+
+        $parameters = $this->getPrivateMethod(
+            'getParameters',
+            [new ReflectionMethod(new CustomClass(), 'setMultiple')
+        ]);
+
+        $this->assertIsArray($parameters);
+
+        $first = reset($parameters);
+        $second = end($parameters);
+
+        $this->assertInstanceOf(FactoryProvider::class, $first);
+        $this->assertIsString($second);
+        $this->assertSame(self::STR, $second);
     }
 
     public function testInjectDependenciesMethod(): void
     {
-        $returnValue = $this->container->injectDependenciesMethod($this->customClass, 'setFactoryProviderSecond');
+        /** @var FactoryProvider $factoryProvider */
+        $factoryProvider = $this->container->injectDependenciesMethod($this->customClass, 'setFactoryProviderSecond');
 
-        $this->assertInstanceOf(FactoryProvider::class, $returnValue);
+        $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
+    }
+
+    public function testInjectDependenciesMethodWithMultipleArguments(): void
+    {
+        /** @var FactoryProvider $factoryProvider */
+        $factoryProvider = $this->container->injectDependenciesMethod($this->customClass, 'setMultiple');
+
+        $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
+        $this->assertSame(self::STR, $factoryProvider->getStr());
+    }
+
+    public function testInjectDependenciesMethodWithMultipleArgumentsDefault(): void
+    {
+        /** @var FactoryProvider $factoryProvider */
+        $factoryProvider = $this->container->injectDependenciesMethod(
+            $this->customClass,
+            'setDefaults',
+            ['str' => self::STR]
+        );
+
+        $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
+        $this->assertSame(self::STR, $factoryProvider->getStr());
     }
 
     public function testInjectDependencies(): void
@@ -91,8 +125,10 @@ class ContainerTest extends Test
     public function testGetParameterClassName()
     {
         $reflectionParameter = new ReflectionParameter(self::REFLECTION_PARAMETERS, 'factoryProvider');
-        $result = $this->getPrivateMethod('getParameterClassName', [$reflectionParameter]);
 
-        $this->assertSame(FactoryProvider::class, $result);
+        /** @var FactoryProvider $factoryProvider */
+        $factoryProvider = $this->getPrivateMethod('getParameterClassName', [$reflectionParameter]);
+
+        $this->assertSame(FactoryProvider::class, $factoryProvider);
     }
 }
