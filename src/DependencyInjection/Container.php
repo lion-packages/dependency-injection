@@ -8,6 +8,7 @@ use DI\Container as DIContainer;
 use DI\ContainerBuilder;
 use Lion\Helpers\Str;
 use ReflectionClass;
+use ReflectionMethod;
 use ReflectionParameter;
 
 class Container
@@ -48,6 +49,14 @@ class Container
         return $this->str->of("{$namespace}{$splitFile[1]}")->replace("/", "\\")->replace('.php', '')->trim()->get();
     }
 
+    private function getParameters(ReflectionMethod $method): array
+    {
+        return array_map(
+            fn($parameter) => $this->container->get($this->getParameterClassName($parameter)),
+            $method->getParameters()
+        );
+    }
+
     public function injectDependencies(object $object): object
     {
         $reflectionClass = new ReflectionClass($object);
@@ -57,15 +66,7 @@ class Container
 
             if (is_string($docDocument)) {
                 if ((bool) preg_match('/@required/', $docDocument)) {
-                    $parameters = $method->getParameters();
-                    $listParameters = [];
-
-                    foreach ($parameters as $parameter) {
-                        $dependencyName = $this->getParameterClassName($parameter);
-                        $listParameters[] = $this->container->get($dependencyName);
-                    }
-
-                    $method->invoke($object, ...$listParameters);
+                    $method->invoke($object, ...$this->getParameters($method));
                 }
             }
         }

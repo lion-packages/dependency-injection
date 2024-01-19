@@ -8,6 +8,7 @@ use DI\Container as DIContainer;
 use Lion\DependencyInjection\Container;
 use Lion\Helpers\Str;
 use Lion\Test\Test;
+use ReflectionMethod;
 use ReflectionParameter;
 use Tests\Provider\CustomClass;
 use Tests\Provider\FactoryProvider;
@@ -15,6 +16,7 @@ use Tests\Provider\FactoryProvider;
 class ContainerTest extends Test
 {
     const FOLDER = './tests/';
+    const PATH_FILE = './Provider/CustomClass.php';
     const FILES = [
         '/var/www/html/tests/ContainerTest.php',
         '/var/www/html/tests/Provider/CustomClass.php',
@@ -45,6 +47,29 @@ class ContainerTest extends Test
 
         $this->assertIsArray($files);
         $this->assertSame(self::FILES, $files);
+    }
+
+    public function testGetNamespace(): void
+    {
+        $namespace = $this->container->getNamespace(self::PATH_FILE, 'Tests\\Provider\\', 'Provider/');
+
+        $this->assertIsString($namespace);
+        $this->assertSame(CustomClass::class, $namespace);
+    }
+
+    public function testGetParameters(): void
+    {
+        $class = new class {
+            public function exampleMethod(FactoryProvider $factoryProvider): FactoryProvider
+            {
+                return $factoryProvider;
+            }
+        };
+
+        $parameters = $this->getPrivateMethod('getParameters', [new ReflectionMethod($class, 'exampleMethod')]);
+
+        $this->assertIsArray($parameters);
+        $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
     }
 
     public function testInjectDependencies(): void
