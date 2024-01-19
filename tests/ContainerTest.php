@@ -72,12 +72,17 @@ class ContainerTest extends Test
         $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
     }
 
+    public function testInjectDependenciesMethod(): void
+    {
+        $returnValue = $this->container->injectDependenciesMethod($this->customClass, 'setFactoryProviderSecond');
+
+        $this->assertInstanceOf(FactoryProvider::class, $returnValue);
+    }
+
     public function testInjectDependencies(): void
     {
         /** @var CustomClass $customClass */
         $customClass = $this->container->injectDependencies($this->customClass);
-
-        $this->initReflection($customClass);
 
         $this->assertInstanceOf(CustomClass::class, $customClass);
         $this->assertInstanceOf(FactoryProvider::class, $customClass->getFactoryProvider());

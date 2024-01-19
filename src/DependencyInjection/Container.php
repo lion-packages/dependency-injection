@@ -57,6 +57,13 @@ class Container
         );
     }
 
+    public function injectDependenciesMethod(object $object, string $method): mixed
+    {
+        $method = (new ReflectionClass($object))->getMethod($method);
+
+        return $method->invoke($object, ...$this->getParameters($method));
+    }
+
     public function injectDependencies(object $object): object
     {
         $reflectionClass = new ReflectionClass($object);
