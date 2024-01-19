@@ -22,4 +22,9 @@ class CustomClass
     {
         $this->factoryProvider = $factoryProvider;
     }
+
+    public function setFactoryProviderSecond(FactoryProvider $factoryProvider): FactoryProvider
+    {
+        return $factoryProvider;
+    }
 }

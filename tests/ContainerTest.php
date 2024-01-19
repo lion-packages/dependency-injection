@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Tests;
 
 use DI\Container as DIContainer;
-use LionHelpers\Str;
 use Lion\DependencyInjection\Container;
-use LionTest\Test;
+use Lion\Helpers\Str;
+use Lion\Test\Test;
+use ReflectionMethod;
 use ReflectionParameter;
 use Tests\Provider\CustomClass;
 use Tests\Provider\FactoryProvider;
@@ -15,6 +16,7 @@ use Tests\Provider\FactoryProvider;
 class ContainerTest extends Test
 {
     const FOLDER = './tests/';
+    const PATH_FILE = './Provider/CustomClass.php';
     const FILES = [
         '/var/www/html/tests/ContainerTest.php',
         '/var/www/html/tests/Provider/CustomClass.php',
@@ -47,12 +49,40 @@ class ContainerTest extends Test
         $this->assertSame(self::FILES, $files);
     }
 
+    public function testGetNamespace(): void
+    {
+        $namespace = $this->container->getNamespace(self::PATH_FILE, 'Tests\\Provider\\', 'Provider/');
+
+        $this->assertIsString($namespace);
+        $this->assertSame(CustomClass::class, $namespace);
+    }
+
+    public function testGetParameters(): void
+    {
+        $class = new class {
+            public function exampleMethod(FactoryProvider $factoryProvider): FactoryProvider
+            {
+                return $factoryProvider;
+            }
+        };
+
+        $parameters = $this->getPrivateMethod('getParameters', [new ReflectionMethod($class, 'exampleMethod')]);
+
+        $this->assertIsArray($parameters);
+        $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
+    }
+
+    public function testInjectDependenciesMethod(): void
+    {
+        $returnValue = $this->container->injectDependenciesMethod($this->customClass, 'setFactoryProviderSecond');
+
+        $this->assertInstanceOf(FactoryProvider::class, $returnValue);
+    }
+
     public function testInjectDependencies(): void
     {
         /** @var CustomClass $customClass */
         $customClass = $this->container->injectDependencies($this->customClass);
-
-        $this->initReflection($customClass);
 
         $this->assertInstanceOf(CustomClass::class, $customClass);
         $this->assertInstanceOf(FactoryProvider::class, $customClass->getFactoryProvider());
