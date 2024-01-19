@@ -27,4 +27,14 @@ class CustomClass
     {
         return $factoryProvider;
     }
+
+    public function setMultiple(FactoryProvider $factoryProvider, string $str = 'test'): FactoryProvider
+    {
+        return $factoryProvider->setStr($str);
+    }
+
+    public function setDefaults(FactoryProvider $factoryProvider, string $str): FactoryProvider
+    {
+        return $factoryProvider->setStr($str);
+    }
 }
