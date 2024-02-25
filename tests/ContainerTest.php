@@ -11,21 +11,25 @@ use Lion\Test\Test;
 use ReflectionMethod;
 use ReflectionParameter;
 use Tests\Provider\ClassProvider;
+use Tests\Provider\ContainerProviderTrait;
 use Tests\Provider\CustomClass;
 use Tests\Provider\ExtendsProvider;
 use Tests\Provider\FactoryProvider;
 
 class ContainerTest extends Test
 {
+    use ContainerProviderTrait;
+
     const STR = 'test';
     const FOLDER = './tests/';
     const PATH_FILE = './Provider/CustomClass.php';
     const FILES = [
-        '/var/www/html/tests/ContainerTest.php',
-        '/var/www/html/tests/Provider/ClassProvider.php',
-        '/var/www/html/tests/Provider/CustomClass.php',
-        '/var/www/html/tests/Provider/ExtendsProvider.php',
-        '/var/www/html/tests/Provider/FactoryProvider.php'
+        './tests/ContainerTest.php',
+        './tests/Provider/ClassProvider.php',
+        './tests/Provider/ContainerProviderTrait.php',
+        './tests/Provider/CustomClass.php',
+        './tests/Provider/ExtendsProvider.php',
+        './tests/Provider/FactoryProvider.php'
     ];
     const REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
 
@@ -44,6 +48,17 @@ class ContainerTest extends Test
     {
         $this->assertInstanceOf(DIContainer::class, $this->getPrivateProperty('container'));
         $this->assertInstanceOf(Str::class, $this->getPrivateProperty('str'));
+    }
+
+    /**
+     * @dataProvider normalizePathProvider
+     */
+    public function testNormalizePath(string $path, string $return): void
+    {
+        $filePath = $this->container->normalizePath($path);
+
+        $this->assertIsString($filePath);
+        $this->assertSame($return, $filePath);
     }
 
     public function testGetFiles(): void
