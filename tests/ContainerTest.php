@@ -10,7 +10,9 @@ use Lion\Helpers\Str;
 use Lion\Test\Test;
 use ReflectionMethod;
 use ReflectionParameter;
+use Tests\Provider\ClassProvider;
 use Tests\Provider\CustomClass;
+use Tests\Provider\ExtendsProvider;
 use Tests\Provider\FactoryProvider;
 
 class ContainerTest extends Test
@@ -20,7 +22,9 @@ class ContainerTest extends Test
     const PATH_FILE = './Provider/CustomClass.php';
     const FILES = [
         '/var/www/html/tests/ContainerTest.php',
+        '/var/www/html/tests/Provider/ClassProvider.php',
         '/var/www/html/tests/Provider/CustomClass.php',
+        '/var/www/html/tests/Provider/ExtendsProvider.php',
         '/var/www/html/tests/Provider/FactoryProvider.php'
     ];
     const REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
@@ -132,6 +136,16 @@ class ContainerTest extends Test
 
         $this->assertInstanceOf(CustomClass::class, $customClass);
         $this->assertInstanceOf(FactoryProvider::class, $customClass->getFactoryProvider());
+    }
+
+    public function testInjectDependenciesWithExtendsClass(): void
+    {
+        /** @var ClassProvider $classProvider */
+        $classProvider = $this->container->injectDependencies(new ClassProvider());
+
+        $this->assertInstanceOf(ExtendsProvider::class, $classProvider);
+        $this->assertInstanceOf(ClassProvider::class, $classProvider);
+        $this->assertInstanceOf(FactoryProvider::class, $classProvider->getFactoryProvider());
     }
 
     public function testGetParameterClassName()
