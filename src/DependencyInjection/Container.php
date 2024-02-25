@@ -44,6 +44,26 @@ class Container
     }
 
     /**
+     * Normalize routes depending on OS type
+     *
+     * @param  string $path [Defined route]
+     *
+     * @return string
+     */
+    public function normalizePath(string $path): string
+    {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $path = str_replace('/', '\\', $path);
+            $path = str_replace("\\\\", "\\", $path);
+        } else {
+            $path = str_replace('\\', '/', $path);
+            $path = str_replace('//', '/', $path);
+        }
+
+        return $path;
+    }
+
+    /**
      * Get files from a defined path
      *
      * @param  string $folder [Defined route]
@@ -62,7 +82,7 @@ class Container
                 if (is_dir($path)) {
                     $files = array_merge($files, $this->getFiles($path));
                 } else {
-                    $files[] = realpath($path);
+                    $files[] = $this->normalizePath($path);
                 }
             }
         }
