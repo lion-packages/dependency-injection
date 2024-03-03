@@ -21,6 +21,7 @@ class ContainerTest extends Test
     use ContainerProviderTrait;
 
     const STR = 'test';
+    const DEFAULT_VALUE = 'default-value';
     const FOLDER = './tests/';
     const PATH_FILE = './Provider/CustomClass.php';
     const FILES = [
@@ -29,7 +30,8 @@ class ContainerTest extends Test
         './tests/Provider/ContainerProviderTrait.php',
         './tests/Provider/CustomClass.php',
         './tests/Provider/ExtendsProvider.php',
-        './tests/Provider/FactoryProvider.php'
+        './tests/Provider/FactoryProvider.php',
+        './tests/Provider/SubClassProvider.php'
     ];
     const REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
 
@@ -81,25 +83,46 @@ class ContainerTest extends Test
     {
         $parameters = $this->getPrivateMethod(
             'getParameters',
-            [new ReflectionMethod(new CustomClass(), 'setFactoryProvider')
-        ]);
+            [new ReflectionMethod(new CustomClass(), 'setFactoryProvider')]
+        );
 
         $this->assertIsArray($parameters);
         $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
+    }
 
+    public function testGetParametersWithDefaultValue(): void
+    {
         $parameters = $this->getPrivateMethod(
             'getParameters',
-            [new ReflectionMethod(new CustomClass(), 'setMultiple')
-        ]);
+            [new ReflectionMethod(new CustomClass(), 'setMultiple')]
+        );
 
         $this->assertIsArray($parameters);
 
-        $first = reset($parameters);
         $second = end($parameters);
 
-        $this->assertInstanceOf(FactoryProvider::class, $first);
+        $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
         $this->assertIsString($second);
         $this->assertSame(self::STR, $second);
+    }
+
+    public function testGetParametersWithDefaultDeclaredValue(): void
+    {
+        $parameters = $this->getPrivateMethod(
+            'getParameters',
+            [
+                new ReflectionMethod(new CustomClass(), 'setMultiple'),
+                ['str' => self::DEFAULT_VALUE]
+            ]
+        );
+
+        $this->assertIsArray($parameters);
+
+        $second = end($parameters);
+
+        $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
+        $this->assertIsString($second);
+        $this->assertSame(self::DEFAULT_VALUE, $second);
     }
 
     public function testInjectDependenciesMethod(): void
@@ -161,6 +184,22 @@ class ContainerTest extends Test
         $this->assertInstanceOf(ExtendsProvider::class, $classProvider);
         $this->assertInstanceOf(ClassProvider::class, $classProvider);
         $this->assertInstanceOf(FactoryProvider::class, $classProvider->getFactoryProvider());
+    }
+
+    public function testInjectDependenciesWithSubDependencies(): void
+    {
+        /** @var ClassProvider $classProvider */
+        $classProvider = $this->container->injectDependencies(new ClassProvider);
+
+        $str = $classProvider
+            ->getSubClassProvider()
+            ->getExtendsProvider()
+            ->getFactoryProviderExtends()
+            ->setStr(self::STR)
+            ->getStr();
+
+        $this->assertIsString($str);
+        $this->assertSame(self::STR, $str);
     }
 
     public function testGetParameterClassName()
