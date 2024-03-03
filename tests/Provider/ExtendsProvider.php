@@ -18,6 +18,11 @@ class ExtendsProvider
         $this->factoryProvider = $factoryProvider;
     }
 
+    public function getFactoryProviderExtends(): FactoryProvider
+    {
+        return $this->factoryProvider;
+    }
+
     protected function getFactoryProvider(): FactoryProvider
     {
         return $this->factoryProvider;

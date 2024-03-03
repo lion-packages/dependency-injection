@@ -125,7 +125,9 @@ class Container
                 if (!empty($params[$parameter->getName()])) {
                     $args[] = $params[$parameter->getName()];
                 } else {
-                    $args[] = $this->container->get($this->getParameterClassName($parameter));
+                    $args[] = $this->injectDependencies(
+                        $this->container->get($this->getParameterClassName($parameter))
+                    );
                 }
             }
         }

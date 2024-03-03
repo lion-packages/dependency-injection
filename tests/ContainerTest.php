@@ -29,7 +29,8 @@ class ContainerTest extends Test
         './tests/Provider/ContainerProviderTrait.php',
         './tests/Provider/CustomClass.php',
         './tests/Provider/ExtendsProvider.php',
-        './tests/Provider/FactoryProvider.php'
+        './tests/Provider/FactoryProvider.php',
+        './tests/Provider/SubClassProvider.php'
     ];
     const REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
 
@@ -81,16 +82,16 @@ class ContainerTest extends Test
     {
         $parameters = $this->getPrivateMethod(
             'getParameters',
-            [new ReflectionMethod(new CustomClass(), 'setFactoryProvider')
-        ]);
+            [new ReflectionMethod(new CustomClass(), 'setFactoryProvider')]
+        );
 
         $this->assertIsArray($parameters);
         $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
 
         $parameters = $this->getPrivateMethod(
             'getParameters',
-            [new ReflectionMethod(new CustomClass(), 'setMultiple')
-        ]);
+            [new ReflectionMethod(new CustomClass(), 'setMultiple')]
+        );
 
         $this->assertIsArray($parameters);
 
@@ -161,6 +162,22 @@ class ContainerTest extends Test
         $this->assertInstanceOf(ExtendsProvider::class, $classProvider);
         $this->assertInstanceOf(ClassProvider::class, $classProvider);
         $this->assertInstanceOf(FactoryProvider::class, $classProvider->getFactoryProvider());
+    }
+
+    public function testInjectDependenciesWithSubDependencies(): void
+    {
+        /** @var ClassProvider $classProvider */
+        $classProvider = $this->container->injectDependencies(new ClassProvider);
+
+        $str = $classProvider
+            ->getSubClassProvider()
+            ->getExtendsProvider()
+            ->getFactoryProviderExtends()
+            ->setStr(self::STR)
+            ->getStr();
+
+        $this->assertIsString($str);
+        $this->assertSame(self::STR, $str);
     }
 
     public function testGetParameterClassName()
