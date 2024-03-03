@@ -120,7 +120,11 @@ class Container
 
         foreach ($method->getParameters() as $parameter) {
             if ($parameter->isDefaultValueAvailable()) {
-                $args[] = $parameter->getDefaultValue();
+                if (!empty($params[$parameter->getName()])) {
+                    $args[] = $params[$parameter->getName()];
+                } else {
+                    $args[] = $parameter->getDefaultValue();
+                }
             } else {
                 if (!empty($params[$parameter->getName()])) {
                     $args[] = $params[$parameter->getName()];
