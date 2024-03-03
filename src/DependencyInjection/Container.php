@@ -172,7 +172,7 @@ class Container
 
     /**
      * Inject dependencies to methods of a class that have the annotation
-     * '@required'
+     * 'required'
      *
      * @param  object $object [Class object]
      * @param  array $params [Array of defined parameters]
