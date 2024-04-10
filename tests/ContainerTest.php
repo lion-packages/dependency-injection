@@ -6,32 +6,27 @@ namespace Tests;
 
 use DI\Container as DIContainer;
 use Lion\DependencyInjection\Container;
-use Lion\Helpers\Str;
 use Lion\Test\Test;
 use ReflectionMethod;
 use ReflectionParameter;
 use Tests\Provider\ClassProvider;
-use Tests\Provider\ContainerProviderTrait;
 use Tests\Provider\CustomClass;
 use Tests\Provider\ExtendsProvider;
 use Tests\Provider\FactoryProvider;
 
 class ContainerTest extends Test
 {
-    use ContainerProviderTrait;
-
     const STR = 'test';
     const DEFAULT_VALUE = 'default-value';
     const FOLDER = './tests/';
     const PATH_FILE = './Provider/CustomClass.php';
     const FILES = [
-        './tests/ContainerTest.php',
-        './tests/Provider/ClassProvider.php',
-        './tests/Provider/ContainerProviderTrait.php',
-        './tests/Provider/CustomClass.php',
-        './tests/Provider/ExtendsProvider.php',
-        './tests/Provider/FactoryProvider.php',
-        './tests/Provider/SubClassProvider.php'
+        '/var/www/html/tests/ContainerTest.php',
+        '/var/www/html/tests/Provider/ClassProvider.php',
+        '/var/www/html/tests/Provider/CustomClass.php',
+        '/var/www/html/tests/Provider/ExtendsProvider.php',
+        '/var/www/html/tests/Provider/FactoryProvider.php',
+        '/var/www/html/tests/Provider/SubClassProvider.php'
     ];
     const REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
 
@@ -49,18 +44,6 @@ class ContainerTest extends Test
     public function testConstruct(): void
     {
         $this->assertInstanceOf(DIContainer::class, $this->getPrivateProperty('container'));
-        $this->assertInstanceOf(Str::class, $this->getPrivateProperty('str'));
-    }
-
-    /**
-     * @dataProvider normalizePathProvider
-     */
-    public function testNormalizePath(string $path, string $return): void
-    {
-        $filePath = $this->container->normalizePath($path);
-
-        $this->assertIsString($filePath);
-        $this->assertSame($return, $filePath);
     }
 
     public function testGetFiles(): void
@@ -159,7 +142,7 @@ class ContainerTest extends Test
     {
         /** @var FactoryProvider $factoryProvider */
         $factoryProvider = $this->container->injectDependenciesCallback(
-            fn(FactoryProvider $factoryProvider, string $str): FactoryProvider => $factoryProvider->setStr($str),
+            fn (FactoryProvider $factoryProvider, string $str): FactoryProvider => $factoryProvider->setStr($str),
             ['str' => self::STR]
         );
 

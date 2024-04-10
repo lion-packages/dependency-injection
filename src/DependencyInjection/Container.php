@@ -7,7 +7,6 @@ namespace Lion\DependencyInjection;
 use Closure;
 use DI\Container as DIContainer;
 use DI\ContainerBuilder;
-use Lion\Helpers\Str;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
@@ -16,57 +15,34 @@ use ReflectionParameter;
 /**
  * Container to generate dependency injection
  *
+ * @property DIContainer $container [Dependency Injection Container]
+ *
  * @package Lion\DependencyInjection
  */
 class Container
 {
     /**
-     * [Object of class DIContainer]
+     * [Dependency Injection Container]
      *
      * @var DIContainer $container
      */
     private DIContainer $container;
 
     /**
-     * [Object of class Str]
-     *
-     * @var Str $str
-     */
-    private Str $str;
-
-    /**
      * Class constructor
      */
     public function __construct()
     {
-        $this->container = (new ContainerBuilder())->useAutowiring(true)->useAttributes(true)->build();
-        $this->str = new Str();
-    }
-
-    /**
-     * Normalize routes depending on OS type
-     *
-     * @param  string $path [Defined route]
-     *
-     * @return string
-     */
-    public function normalizePath(string $path): string
-    {
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $path = str_replace('/', '\\', $path);
-            $path = str_replace("\\\\", "\\", $path);
-        } else {
-            $path = str_replace('\\', '/', $path);
-            $path = str_replace('//', '/', $path);
-        }
-
-        return $path;
+        $this->container = (new ContainerBuilder())
+            ->useAutowiring(true)
+            ->useAttributes(true)
+            ->build();
     }
 
     /**
      * Get files from a defined path
      *
-     * @param  string $folder [Defined route]
+     * @param string $folder [Defined route]
      *
      * @return array<string>
      */
@@ -82,7 +58,7 @@ class Container
                 if (is_dir($path)) {
                     $files = array_merge($files, $this->getFiles($path));
                 } else {
-                    $files[] = $this->normalizePath($path);
+                    $files[] = realpath($path);
                 }
             }
         }
@@ -93,9 +69,9 @@ class Container
     /**
      * Gets the namespace of a class through a defined path
      *
-     * @param  string $file [File path]
-     * @param  string $namespace [Namespace for the file]
-     * @param  string $split [Separator to obtain the namespace]
+     * @param string $file [File path]
+     * @param string $namespace [Namespace for the file]
+     * @param string $split [Separator to obtain the namespace]
      *
      * @return string
      */
@@ -103,14 +79,18 @@ class Container
     {
         $splitFile = explode($split, $file);
 
-        return $this->str->of("{$namespace}{$splitFile[1]}")->replace("/", "\\")->replace('.php', '')->trim()->get();
+        $namespace = str_replace("/", "\\", "{$namespace}{$splitFile[1]}");
+
+        $namespace = str_replace('.php', '',  $namespace);
+
+        return trim($namespace);
     }
 
     /**
      * Gets the parameters of a function
      *
-     * @param  ReflectionFunctionAbstract $method [Method obtained]
-     * @param  array $params [Array of defined parameters]
+     * @param ReflectionFunctionAbstract $method [Method obtained]
+     * @param array $params [Array of defined parameters]
      *
      * @return array
      */
@@ -142,9 +122,9 @@ class Container
     /**
      * Inject dependencies into a method of a class
      *
-     * @param  object $object [Class object]
-     * @param  string $method [Method name]
-     * @param  array $params [Array of defined parameters]
+     * @param object $object [Class object]
+     * @param string $method [Method name]
+     * @param array $params [Array of defined parameters]
      *
      * @return mixed
      */
@@ -158,8 +138,8 @@ class Container
     /**
      * Inject dependencies to a callback
      *
-     * @param  Closure $closure [Defined callback]
-     * @param  array $params [Array of defined parameters]
+     * @param Closure $closure [Defined callback]
+     * @param array $params [Array of defined parameters]
      *
      * @return mixed
      */
@@ -174,8 +154,8 @@ class Container
      * Inject dependencies to methods of a class that have the annotation
      * 'required'
      *
-     * @param  object $object [Class object]
-     * @param  array $params [Array of defined parameters]
+     * @param object $object [Class object]
+     * @param array $params [Array of defined parameters]
      *
      * @return object
      */
@@ -197,7 +177,7 @@ class Container
     /**
      * Gets the data type of the parameters obtained
      *
-     * @param  ReflectionParameter $parameter [Defined parameter of type
+     * @param ReflectionParameter $parameter [Defined parameter of type
      * ReflectionParameter]
      *
      * @return null|string
