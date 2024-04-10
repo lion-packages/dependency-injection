@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lion\DependencyInjection;
+namespace Lion\Dependency\Injection;
 
 use Closure;
 use DI\Container as DIContainer;

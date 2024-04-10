@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests;
 
 use DI\Container as DIContainer;
-use Lion\DependencyInjection\Container;
+use Lion\Dependency\Injection\Container;
 use Lion\Test\Test;
 use ReflectionMethod;
 use ReflectionParameter;
