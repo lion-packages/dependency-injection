@@ -5,7 +5,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Lion\\DependencyInjection\\": "src/DependencyInjection/"
+            "Lion\\Dependency\\Injection\\": "src/DependencyInjection/"
         }
     },
     "autoload-dev": {
@@ -19,7 +19,6 @@
     },
     "require": {
         "php": ">=8.2",
-        "php-di/php-di": "^7.0",
-        "lion/helpers": "^3.0"
+        "php-di/php-di": "^7.0"
     }
 }
