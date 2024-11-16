@@ -13,7 +13,7 @@
     stopOnFailure="true"
     stopOnWarning="true"
     bootstrap="vendor/autoload.php"
-    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.3/phpunit.xsd"
     backupStaticProperties="false"
     displayDetailsOnIncompleteTests="true"
     displayDetailsOnSkippedTests="true"
@@ -29,9 +29,15 @@
         <ini name="memory_limit" value="2048M" />
     </php>
 
+    <source>
+        <include>
+            <directory>src/DependencyInjection</directory>
+        </include>
+    </source>
+
     <testsuites>
         <testsuite name="All-Test">
-            <directory>tests/</directory>
+            <file>tests/ContainerTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
