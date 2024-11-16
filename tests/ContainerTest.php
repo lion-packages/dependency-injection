@@ -9,11 +9,9 @@ use Lion\Dependency\Injection\Container;
 use Lion\Test\Test;
 use PHPUnit\Framework\Attributes\Test as Testing;
 use ReflectionException;
-use ReflectionMethod;
-use ReflectionParameter;
+use Tests\Provider\ClassConstructorProvider;
 use Tests\Provider\ClassProvider;
 use Tests\Provider\CustomClass;
-use Tests\Provider\ExtendsProvider;
 use Tests\Provider\FactoryProvider;
 
 class ContainerTest extends Test
@@ -32,7 +30,6 @@ class ContainerTest extends Test
     private const array REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
 
     private Container $container;
-    private CustomClass $customClass;
 
     /**
      * @throws ReflectionException
@@ -40,7 +37,6 @@ class ContainerTest extends Test
     protected function setUp(): void
     {
         $this->container = new Container();
-        $this->customClass = new CustomClass();
 
         $this->initReflection($this->container);
     }
@@ -55,176 +51,83 @@ class ContainerTest extends Test
     }
 
     #[Testing]
-    public function getFiles(): void
+    public function resolve(): void
     {
-        $files = $this->container->getFiles(self::FOLDER . 'Provider/');
+        /** @var ClassConstructorProvider $classProvider */
+        $classProvider = $this->container->resolve(ClassConstructorProvider::class);
 
-        $this->assertIsArray($files);
-        $this->assertSame(self::FILES, $files);
+        $this->assertIsObject($classProvider);
+        $this->assertInstanceOf(ClassConstructorProvider::class, $classProvider);
+
+        $returnObject = $classProvider->getCustomClass();
+
+        $this->assertIsObject($returnObject);
+        $this->assertInstanceOf(CustomClass::class, $returnObject);
     }
 
     #[Testing]
-    public function getNamespace(): void
-    {
-        $namespace = $this->container->getNamespace(self::PATH_FILE, 'Tests\\Provider\\', 'Provider/');
-
-        $this->assertIsString($namespace);
-        $this->assertSame(CustomClass::class, $namespace);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Testing]
-    public function getParameters(): void
-    {
-        $parameters = $this->getPrivateMethod(
-            'getParameters',
-            [new ReflectionMethod(new CustomClass(), 'setFactoryProvider')]
-        );
-
-        $this->assertIsArray($parameters);
-        $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Testing]
-    public function getParametersWithDefaultValue(): void
-    {
-        $parameters = $this->getPrivateMethod(
-            'getParameters',
-            [new ReflectionMethod(new CustomClass(), 'setMultiple')]
-        );
-
-        $this->assertIsArray($parameters);
-
-        $second = end($parameters);
-
-        $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
-        $this->assertIsString($second);
-        $this->assertSame(self::STR, $second);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Testing]
-    public function getParametersWithDefaultDeclaredValue(): void
-    {
-        $parameters = $this->getPrivateMethod(
-            'getParameters',
-            [
-                new ReflectionMethod(new CustomClass(), 'setMultiple'),
-                ['str' => self::DEFAULT_VALUE]
-            ]
-        );
-
-        $this->assertIsArray($parameters);
-
-        $second = end($parameters);
-
-        $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
-        $this->assertIsString($second);
-        $this->assertSame(self::DEFAULT_VALUE, $second);
-    }
-
-    #[Testing]
-    public function injectDependenciesMethod(): void
-    {
-        /** @var FactoryProvider $factoryProvider */
-        $factoryProvider = $this->container->injectDependenciesMethod($this->customClass, 'setFactoryProviderSecond');
-
-        $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
-    }
-
-    #[Testing]
-    public function injectDependenciesMethodWithMultipleArguments(): void
-    {
-        /** @var FactoryProvider $factoryProvider */
-        $factoryProvider = $this->container->injectDependenciesMethod($this->customClass, 'setMultiple');
-
-        $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
-        $this->assertSame(self::STR, $factoryProvider->getStr());
-    }
-
-    #[Testing]
-    public function injectDependenciesMethodWithMultipleArgumentsDefault(): void
-    {
-        /** @var FactoryProvider $factoryProvider */
-        $factoryProvider = $this->container->injectDependenciesMethod(
-            $this->customClass,
-            'setDefaults',
-            ['str' => self::STR]
-        );
-
-        $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
-        $this->assertSame(self::STR, $factoryProvider->getStr());
-    }
-
-    #[Testing]
-    public function injectDependenciesCallback(): void
-    {
-        /** @var FactoryProvider $factoryProvider */
-        $factoryProvider = $this->container->injectDependenciesCallback(
-            fn (FactoryProvider $factoryProvider, string $str): FactoryProvider => $factoryProvider->setStr($str),
-            ['str' => self::STR]
-        );
-
-        $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
-        $this->assertSame(self::STR, $factoryProvider->getStr());
-    }
-
-    #[Testing]
-    public function injectDependencies(): void
-    {
-        /** @var CustomClass $customClass */
-        $customClass = $this->container->injectDependencies($this->customClass);
-
-        $this->assertInstanceOf(CustomClass::class, $customClass);
-        $this->assertInstanceOf(FactoryProvider::class, $customClass->getFactoryProvider());
-    }
-
-    #[Testing]
-    public function injectDependenciesWithExtendsClass(): void
+    public function callMethod(): void
     {
         /** @var ClassProvider $classProvider */
-        $classProvider = $this->container->injectDependencies(new ClassProvider());
+        $classProvider = $this->container->resolve(ClassProvider::class);
 
-        $this->assertInstanceOf(ExtendsProvider::class, $classProvider);
+        $this->assertIsObject($classProvider);
         $this->assertInstanceOf(ClassProvider::class, $classProvider);
-        $this->assertInstanceOf(FactoryProvider::class, $classProvider->getFactoryProvider());
+
+        $returnObject = $this->container->callMethod($classProvider, 'setSubClassProvider');
+
+        $this->assertIsObject($returnObject);
+        $this->assertInstanceOf(ClassProvider::class, $returnObject);
     }
 
     #[Testing]
-    public function injectDependenciesWithSubDependencies(): void
+    public function callMethodWithParams(): void
     {
-        /** @var ClassProvider $classProvider */
-        $classProvider = $this->container->injectDependencies(new ClassProvider);
+        /** @var CustomClass $classProvider */
+        $classProvider = $this->container->resolve(CustomClass::class);
 
-        $str = $classProvider
-            ->getSubClassProvider()
-            ->getExtendsProvider()
-            ->getFactoryProviderExtends()
-            ->setStr(self::STR)
-            ->getStr();
+        $this->assertIsObject($classProvider);
+        $this->assertInstanceOf(CustomClass::class, $classProvider);
 
-        $this->assertIsString($str);
-        $this->assertSame(self::STR, $str);
+        $returnObject = $this->container->callMethod($classProvider, 'setDefaults', [
+            'str' => self::STR,
+        ]);
+
+        $this->assertIsObject($returnObject);
+        $this->assertInstanceOf(FactoryProvider::class, $returnObject);
+        $this->assertSame(self::STR, $returnObject->getStr());
     }
 
-    /**
-     * @throws ReflectionException
-     */
     #[Testing]
-    public function getParameterClassName()
+    public function callCallback(): void
     {
-        $reflectionParameter = new ReflectionParameter(self::REFLECTION_PARAMETERS, 'factoryProvider');
+        $returnObject = $this->container->callCallback(function (
+            CustomClass $customClass,
+            FactoryProvider $factoryProvider
+        ): FactoryProvider {
+            return $customClass->setDefaults($factoryProvider, self::STR);
+        });
 
-        /** @var FactoryProvider $factoryProvider */
-        $factoryProvider = $this->getPrivateMethod('getParameterClassName', [$reflectionParameter]);
+        $this->assertIsObject($returnObject);
+        $this->assertInstanceOf(FactoryProvider::class, $returnObject);
+        $this->assertSame(self::STR, $returnObject->getStr());
+    }
 
-        $this->assertSame(FactoryProvider::class, $factoryProvider);
+    #[Testing]
+    public function callCallbackWithParams(): void
+    {
+        $returnObject = $this->container->callCallback(function (
+            CustomClass $customClass,
+            FactoryProvider $factoryProvider,
+            string $str
+        ): FactoryProvider {
+            return $customClass->setDefaults($factoryProvider, $str);
+        }, [
+            'str' => self::STR,
+        ]);
+
+        $this->assertIsObject($returnObject);
+        $this->assertInstanceOf(FactoryProvider::class, $returnObject);
+        $this->assertSame(self::STR, $returnObject->getStr());
     }
 }
