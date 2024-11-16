@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace Lion\Dependency\Injection;
 
-use Closure;
 use DI\Container as DIContainer;
 use DI\ContainerBuilder;
 use Exception;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionFunction;
-use ReflectionFunctionAbstract;
-use ReflectionParameter;
 
 /**
- * Container to generate dependency injection
+ * Dependency Injection Container Wrapper
+ *
+ * This class simplifies dependency injection by leveraging PHP-DI
+ *
+ * It provides methods to resolve dependencies, invoke methods,
+ * and execute callbacks with automatic dependency injection
  *
  * @property DIContainer $container [Dependency Injection Container]
  *
- * @package Lion\DependencyInjection
+ * @package Lion\Dependency\Injection
  */
 class Container
 {
@@ -33,6 +32,8 @@ class Container
     /**
      * Class constructor
      *
+     * Initializes the PHP-DI container with autowiring and attribute support
+     *
      * @throws Exception
      */
     public function __construct()
@@ -44,161 +45,41 @@ class Container
     }
 
     /**
-     * Get files from a defined path
+     * Resolves a class or dependency from the container
      *
-     * @param string $folder [Defined route]
-     *
-     * @return array<string>
-     */
-    public function getFiles(string $folder): array
-    {
-        $files = [];
-
-        $content = scandir($folder);
-
-        foreach ($content as $element) {
-            if ($element != '.' && $element != '..') {
-                $path = $folder . '/' . $element;
-
-                if (is_dir($path)) {
-                    $files = array_merge($files, $this->getFiles($path));
-                } else {
-                    $files[] = realpath($path);
-                }
-            }
-        }
-
-        return $files;
-    }
-
-    /**
-     * Gets the namespace of a class through a defined path
-     *
-     * @param string $file [File path]
-     * @param string $namespace [Namespace for the file]
-     * @param string $split [Separator to obtain the namespace]
-     *
-     * @return string
-     */
-    public function getNamespace(string $file, string $namespace, string $split = '/'): string
-    {
-        $splitFile = explode($split, $file);
-
-        $namespace = str_replace("/", "\\", "{$namespace}{$splitFile[1]}");
-
-        $namespace = str_replace('.php', '',  $namespace);
-
-        return trim($namespace);
-    }
-
-    /**
-     * Gets the parameters of a function
-     *
-     * @param ReflectionFunctionAbstract $method [Method obtained]
-     * @param array $params [Array of defined parameters]
-     *
-     * @return array
-     *
-     * @throws ReflectionException
-     */
-    private function getParameters(ReflectionFunctionAbstract $method, array $params = []): array
-    {
-        $args = [];
-
-        foreach ($method->getParameters() as $parameter) {
-            if ($parameter->isDefaultValueAvailable()) {
-                if (!empty($params[$parameter->getName()])) {
-                    $args[] = $params[$parameter->getName()];
-                } else {
-                    $args[] = $parameter->getDefaultValue();
-                }
-            } else {
-                if (!empty($params[$parameter->getName()])) {
-                    $args[] = $params[$parameter->getName()];
-                } else {
-                    $args[] = $this->injectDependencies(
-                        $this->container->get($this->getParameterClassName($parameter))
-                    );
-                }
-            }
-        }
-
-        return $args;
-    }
-
-    /**
-     * Inject dependencies into a method of a class
-     *
-     * @param object $object [Class object]
-     * @param string $method [Method name]
-     * @param array $params [Array of defined parameters]
-     *
-     * @return mixed
-     *
-     * @throws ReflectionException
-     */
-    public function injectDependenciesMethod(object $object, string $method, array $params = []): mixed
-    {
-        $method = (new ReflectionClass($object))->getMethod($method);
-
-        return $method->invoke($object, ...$this->getParameters($method, $params));
-    }
-
-    /**
-     * Inject dependencies to a callback
-     *
-     * @param Closure $closure [Defined callback]
-     * @param array $params [Array of defined parameters]
-     *
-     * @return mixed
-     *
-     * @throws ReflectionException
-     */
-    public function injectDependenciesCallback(Closure $closure, array $params = []): mixed
-    {
-        $method = new ReflectionFunction($closure);
-
-        return $method->invoke(...$this->getParameters($method, $params));
-    }
-
-    /**
-     * Inject dependencies to methods of a class that have the annotation
-     * 'required'
-     *
-     * @param object $object [Class object]
-     * @param array $params [Array of defined parameters]
+     * @param string $className [The fully qualified class name to resolve]
      *
      * @return object
-     *
-     * @throws ReflectionException
      */
-    public function injectDependencies(object $object, array $params = []): object
+    public function resolve(string $className): object
     {
-        foreach ((new ReflectionClass($object))->getMethods() as $method) {
-            $docDocument = $method->getDocComment();
-
-            if (is_string($docDocument)) {
-                if (str_contains($docDocument, '@required')) {
-                    $method->invoke($object, ...$this->getParameters($method, $params));
-                }
-            }
-        }
-
-        return $object;
+        return $this->container->get($className);
     }
 
     /**
-     * Gets the data type of the parameters obtained
+     * Calls a method on an object with automatic dependency injection.
      *
-     * @param ReflectionParameter $parameter [Defined parameter of type
-     * ReflectionParameter]
+     * @param object $object [The object instance]
+     * @param string $method [The method name to invoke]
+     * @param array $params [Optional array of additional parameters to pass]
      *
-     * @return null|string
+     * @return mixed
      */
-    private function getParameterClassName(ReflectionParameter $parameter): ?string
+    public function callMethod(object $object, string $method, array $params = []): mixed
     {
-        $type = $parameter->getType();
+        return $this->container->call([$object, $method], $params);
+    }
 
-        return $type ? (string) $type : null;
+    /**
+     * Executes a callback with automatic dependency injection
+     *
+     * @param callable $callback [The callback to execute]
+     * @param array $params [Optional array of additional parameters to pass]
+     *
+     * @return mixed
+     */
+    public function callCallback(callable $callback, array $params = []): mixed
+    {
+        return $this->container->call($callback, $params);
     }
 }
