@@ -7,6 +7,8 @@ namespace Tests;
 use DI\Container as DIContainer;
 use Lion\Dependency\Injection\Container;
 use Lion\Test\Test;
+use PHPUnit\Framework\Attributes\Test as Testing;
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 use Tests\Provider\ClassProvider;
@@ -16,23 +18,25 @@ use Tests\Provider\FactoryProvider;
 
 class ContainerTest extends Test
 {
-    const STR = 'test';
-    const DEFAULT_VALUE = 'default-value';
-    const FOLDER = './tests/';
-    const PATH_FILE = './Provider/CustomClass.php';
-    const FILES = [
-        '/var/www/html/tests/ContainerTest.php',
+    private const string STR = 'test';
+    private const string DEFAULT_VALUE = 'default-value';
+    private const string FOLDER = './tests/';
+    private const string PATH_FILE = './Provider/CustomClass.php';
+    private const array FILES = [
         '/var/www/html/tests/Provider/ClassProvider.php',
         '/var/www/html/tests/Provider/CustomClass.php',
         '/var/www/html/tests/Provider/ExtendsProvider.php',
         '/var/www/html/tests/Provider/FactoryProvider.php',
         '/var/www/html/tests/Provider/SubClassProvider.php'
     ];
-    const REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
+    private const array REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
 
     private Container $container;
     private CustomClass $customClass;
 
+    /**
+     * @throws ReflectionException
+     */
     protected function setUp(): void
     {
         $this->container = new Container();
@@ -41,20 +45,26 @@ class ContainerTest extends Test
         $this->initReflection($this->container);
     }
 
-    public function testConstruct(): void
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function constructTest(): void
     {
         $this->assertInstanceOf(DIContainer::class, $this->getPrivateProperty('container'));
     }
 
-    public function testGetFiles(): void
+    #[Testing]
+    public function getFiles(): void
     {
-        $files = $this->container->getFiles(self::FOLDER);
+        $files = $this->container->getFiles(self::FOLDER . 'Provider/');
 
         $this->assertIsArray($files);
         $this->assertSame(self::FILES, $files);
     }
 
-    public function testGetNamespace(): void
+    #[Testing]
+    public function getNamespace(): void
     {
         $namespace = $this->container->getNamespace(self::PATH_FILE, 'Tests\\Provider\\', 'Provider/');
 
@@ -62,7 +72,11 @@ class ContainerTest extends Test
         $this->assertSame(CustomClass::class, $namespace);
     }
 
-    public function testGetParameters(): void
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function getParameters(): void
     {
         $parameters = $this->getPrivateMethod(
             'getParameters',
@@ -73,7 +87,11 @@ class ContainerTest extends Test
         $this->assertInstanceOf(FactoryProvider::class, reset($parameters));
     }
 
-    public function testGetParametersWithDefaultValue(): void
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function getParametersWithDefaultValue(): void
     {
         $parameters = $this->getPrivateMethod(
             'getParameters',
@@ -89,7 +107,11 @@ class ContainerTest extends Test
         $this->assertSame(self::STR, $second);
     }
 
-    public function testGetParametersWithDefaultDeclaredValue(): void
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function getParametersWithDefaultDeclaredValue(): void
     {
         $parameters = $this->getPrivateMethod(
             'getParameters',
@@ -108,7 +130,8 @@ class ContainerTest extends Test
         $this->assertSame(self::DEFAULT_VALUE, $second);
     }
 
-    public function testInjectDependenciesMethod(): void
+    #[Testing]
+    public function injectDependenciesMethod(): void
     {
         /** @var FactoryProvider $factoryProvider */
         $factoryProvider = $this->container->injectDependenciesMethod($this->customClass, 'setFactoryProviderSecond');
@@ -116,7 +139,8 @@ class ContainerTest extends Test
         $this->assertInstanceOf(FactoryProvider::class, $factoryProvider);
     }
 
-    public function testInjectDependenciesMethodWithMultipleArguments(): void
+    #[Testing]
+    public function injectDependenciesMethodWithMultipleArguments(): void
     {
         /** @var FactoryProvider $factoryProvider */
         $factoryProvider = $this->container->injectDependenciesMethod($this->customClass, 'setMultiple');
@@ -125,7 +149,8 @@ class ContainerTest extends Test
         $this->assertSame(self::STR, $factoryProvider->getStr());
     }
 
-    public function testInjectDependenciesMethodWithMultipleArgumentsDefault(): void
+    #[Testing]
+    public function injectDependenciesMethodWithMultipleArgumentsDefault(): void
     {
         /** @var FactoryProvider $factoryProvider */
         $factoryProvider = $this->container->injectDependenciesMethod(
@@ -138,7 +163,8 @@ class ContainerTest extends Test
         $this->assertSame(self::STR, $factoryProvider->getStr());
     }
 
-    public function testInjectDependenciesCallback(): void
+    #[Testing]
+    public function injectDependenciesCallback(): void
     {
         /** @var FactoryProvider $factoryProvider */
         $factoryProvider = $this->container->injectDependenciesCallback(
@@ -150,7 +176,8 @@ class ContainerTest extends Test
         $this->assertSame(self::STR, $factoryProvider->getStr());
     }
 
-    public function testInjectDependencies(): void
+    #[Testing]
+    public function injectDependencies(): void
     {
         /** @var CustomClass $customClass */
         $customClass = $this->container->injectDependencies($this->customClass);
@@ -159,7 +186,8 @@ class ContainerTest extends Test
         $this->assertInstanceOf(FactoryProvider::class, $customClass->getFactoryProvider());
     }
 
-    public function testInjectDependenciesWithExtendsClass(): void
+    #[Testing]
+    public function injectDependenciesWithExtendsClass(): void
     {
         /** @var ClassProvider $classProvider */
         $classProvider = $this->container->injectDependencies(new ClassProvider());
@@ -169,7 +197,8 @@ class ContainerTest extends Test
         $this->assertInstanceOf(FactoryProvider::class, $classProvider->getFactoryProvider());
     }
 
-    public function testInjectDependenciesWithSubDependencies(): void
+    #[Testing]
+    public function injectDependenciesWithSubDependencies(): void
     {
         /** @var ClassProvider $classProvider */
         $classProvider = $this->container->injectDependencies(new ClassProvider);
@@ -185,7 +214,11 @@ class ContainerTest extends Test
         $this->assertSame(self::STR, $str);
     }
 
-    public function testGetParameterClassName()
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function getParameterClassName()
     {
         $reflectionParameter = new ReflectionParameter(self::REFLECTION_PARAMETERS, 'factoryProvider');
 

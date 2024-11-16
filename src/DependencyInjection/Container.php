@@ -7,7 +7,9 @@ namespace Lion\Dependency\Injection;
 use Closure;
 use DI\Container as DIContainer;
 use DI\ContainerBuilder;
+use Exception;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
@@ -30,6 +32,8 @@ class Container
 
     /**
      * Class constructor
+     *
+     * @throws Exception
      */
     public function __construct()
     {
@@ -49,6 +53,7 @@ class Container
     public function getFiles(string $folder): array
     {
         $files = [];
+
         $content = scandir($folder);
 
         foreach ($content as $element) {
@@ -93,6 +98,8 @@ class Container
      * @param array $params [Array of defined parameters]
      *
      * @return array
+     *
+     * @throws ReflectionException
      */
     private function getParameters(ReflectionFunctionAbstract $method, array $params = []): array
     {
@@ -127,6 +134,8 @@ class Container
      * @param array $params [Array of defined parameters]
      *
      * @return mixed
+     *
+     * @throws ReflectionException
      */
     public function injectDependenciesMethod(object $object, string $method, array $params = []): mixed
     {
@@ -142,6 +151,8 @@ class Container
      * @param array $params [Array of defined parameters]
      *
      * @return mixed
+     *
+     * @throws ReflectionException
      */
     public function injectDependenciesCallback(Closure $closure, array $params = []): mixed
     {
@@ -158,6 +169,8 @@ class Container
      * @param array $params [Array of defined parameters]
      *
      * @return object
+     *
+     * @throws ReflectionException
      */
     public function injectDependencies(object $object, array $params = []): object
     {
@@ -165,7 +178,7 @@ class Container
             $docDocument = $method->getDocComment();
 
             if (is_string($docDocument)) {
-                if ((bool) preg_match('/@required/', $docDocument)) {
+                if (str_contains($docDocument, '@required')) {
                     $method->invoke($object, ...$this->getParameters($method, $params));
                 }
             }
