@@ -14,7 +14,7 @@
         }
     },
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.4",
         "php-di/php-di": "^7.0"
     },
     "require-dev": {
