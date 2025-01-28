@@ -6,6 +6,8 @@ namespace Lion\Dependency\Injection;
 
 use DI\Container as DIContainer;
 use DI\ContainerBuilder;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Exception;
 
 /**
@@ -30,9 +32,8 @@ class Container
     private DIContainer $container;
 
     /**
-     * Class constructor
-     *
-     * Initializes the PHP-DI container with autowiring and attribute support
+     * Class constructor, Initializes the PHP-DI container with autowiring and
+     * attribute support
      *
      * @throws Exception
      */
@@ -49,9 +50,12 @@ class Container
      *
      * @param string $className [The fully qualified class name to resolve]
      *
-     * @return object
+     * @return mixed
+     *
+     * @throws DependencyException [Error while resolving the entry]
+     * @throws NotFoundException [No entry found for the given name]
      */
-    public function resolve(string $className): object
+    public function resolve(string $className): mixed
     {
         return $this->container->get($className);
     }
@@ -61,7 +65,8 @@ class Container
      *
      * @param object $object [The object instance]
      * @param string $method [The method name to invoke]
-     * @param array $params [Optional array of additional parameters to pass]
+     * @param array<string, string> $params [Optional array of additional
+     * parameters to pass]
      *
      * @return mixed
      */
@@ -74,7 +79,8 @@ class Container
      * Executes a callback with automatic dependency injection
      *
      * @param callable $callback [The callback to execute]
-     * @param array $params [Optional array of additional parameters to pass]
+     * @param array<string, string> $params [Optional array of additional
+     * parameters to pass]
      *
      * @return mixed
      */
