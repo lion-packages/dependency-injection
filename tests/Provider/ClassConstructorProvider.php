@@ -6,11 +6,12 @@ namespace Tests\Provider;
 
 use Tests\Provider\CustomClass;
 
-class ClassConstructorProvider
+readonly class ClassConstructorProvider
 {
     public function __construct(
         private CustomClass $customClass
-    ) {}
+    ) {
+    }
 
     public function getCustomClass(): CustomClass
     {

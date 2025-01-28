@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests;
 
 use DI\Container as DIContainer;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Lion\Dependency\Injection\Container;
 use Lion\Test\Test;
 use PHPUnit\Framework\Attributes\Test as Testing;
@@ -17,18 +19,6 @@ use Tests\Provider\FactoryProvider;
 class ContainerTest extends Test
 {
     private const string STR = 'test';
-    private const string DEFAULT_VALUE = 'default-value';
-    private const string FOLDER = './tests/';
-    private const string PATH_FILE = './Provider/CustomClass.php';
-    private const array FILES = [
-        '/var/www/html/tests/Provider/ClassProvider.php',
-        '/var/www/html/tests/Provider/CustomClass.php',
-        '/var/www/html/tests/Provider/ExtendsProvider.php',
-        '/var/www/html/tests/Provider/FactoryProvider.php',
-        '/var/www/html/tests/Provider/SubClassProvider.php'
-    ];
-    private const array REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
-
     private Container $container;
 
     /**
@@ -50,43 +40,49 @@ class ContainerTest extends Test
         $this->assertInstanceOf(DIContainer::class, $this->getPrivateProperty('container'));
     }
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     #[Testing]
     public function resolve(): void
     {
         /** @var ClassConstructorProvider $classProvider */
         $classProvider = $this->container->resolve(ClassConstructorProvider::class);
 
-        $this->assertIsObject($classProvider);
         $this->assertInstanceOf(ClassConstructorProvider::class, $classProvider);
 
         $returnObject = $classProvider->getCustomClass();
 
-        $this->assertIsObject($returnObject);
         $this->assertInstanceOf(CustomClass::class, $returnObject);
     }
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     #[Testing]
     public function callMethod(): void
     {
         /** @var ClassProvider $classProvider */
         $classProvider = $this->container->resolve(ClassProvider::class);
 
-        $this->assertIsObject($classProvider);
         $this->assertInstanceOf(ClassProvider::class, $classProvider);
 
         $returnObject = $this->container->callMethod($classProvider, 'setSubClassProvider');
 
-        $this->assertIsObject($returnObject);
         $this->assertInstanceOf(ClassProvider::class, $returnObject);
     }
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     #[Testing]
     public function callMethodWithParams(): void
     {
         /** @var CustomClass $classProvider */
         $classProvider = $this->container->resolve(CustomClass::class);
-
-        $this->assertIsObject($classProvider);
         $this->assertInstanceOf(CustomClass::class, $classProvider);
 
         $returnObject = $this->container->callMethod($classProvider, 'setDefaults', [
