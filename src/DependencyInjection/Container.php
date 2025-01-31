@@ -63,14 +63,14 @@ class Container
     /**
      * Calls a method on an object with automatic dependency injection.
      *
-     * @param object $object [The object instance]
+     * @param mixed $object [The object instance]
      * @param string $method [The method name to invoke]
-     * @param array<string, string> $params [Optional array of additional
+     * @param array<string, mixed> $params [Optional array of additional
      * parameters to pass]
      *
      * @return mixed
      */
-    public function callMethod(object $object, string $method, array $params = []): mixed
+    public function callMethod(mixed $object, string $method, array $params = []): mixed
     {
         return $this->container->call([$object, $method], $params);
     }
@@ -79,7 +79,7 @@ class Container
      * Executes a callback with automatic dependency injection
      *
      * @param callable $callback [The callback to execute]
-     * @param array<string, string> $params [Optional array of additional
+     * @param array<string, mixed> $params [Optional array of additional
      * parameters to pass]
      *
      * @return mixed
