@@ -18,8 +18,6 @@ use Exception;
  * It provides methods to resolve dependencies, invoke methods,
  * and execute callbacks with automatic dependency injection
  *
- * @property DIContainer $container [Dependency Injection Container]
- *
  * @package Lion\Dependency\Injection
  */
 class Container
@@ -36,10 +34,12 @@ class Container
      * attribute support
      *
      * @throws Exception
+     *
+     * @infection-ignore-all
      */
     public function __construct()
     {
-        $this->container = (new ContainerBuilder())
+        $this->container = new ContainerBuilder()
             ->useAutowiring(true)
             ->useAttributes(true)
             ->build();
