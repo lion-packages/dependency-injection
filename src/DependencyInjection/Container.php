@@ -85,7 +85,7 @@ class Container
      * @return mixed
      */
     public function callCallback(callable $callback, array $params = [
-        
+
     ]): mixed
     {
         return $this->container->call($callback, $params);
