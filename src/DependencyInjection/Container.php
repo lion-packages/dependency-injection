@@ -81,7 +81,7 @@ class Container
 
         $namespace = str_replace("/", "\\", "{$namespace}{$splitFile[1]}");
 
-        $namespace = str_replace('.php', '',  $namespace);
+        $namespace = str_replace('.php', '', $namespace);
 
         return trim($namespace);
     }
