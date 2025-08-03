@@ -13,23 +13,21 @@ use ReflectionFunctionAbstract;
 use ReflectionParameter;
 
 /**
- * Container to generate dependency injection
+ * Container to generate dependency injection.
  *
  * @property DIContainer $container [Dependency Injection Container]
- *
- * @package Lion\DependencyInjection
  */
 class Container
 {
     /**
-     * [Dependency Injection Container]
+     * [Dependency Injection Container].
      *
-     * @var DIContainer $container
+     * @var DIContainer
      */
     private DIContainer $container;
 
     /**
-     * Class constructor
+     * Class constructor.
      */
     public function __construct()
     {
@@ -40,7 +38,7 @@ class Container
     }
 
     /**
-     * Get files from a defined path
+     * Get files from a defined path.
      *
      * @param string $folder [Defined route]
      *
@@ -53,7 +51,7 @@ class Container
 
         foreach ($content as $element) {
             if ($element != '.' && $element != '..') {
-                $path = $folder . '/' . $element;
+                $path = $folder.'/'.$element;
 
                 if (is_dir($path)) {
                     $files = array_merge($files, $this->getFiles($path));
@@ -67,11 +65,11 @@ class Container
     }
 
     /**
-     * Gets the namespace of a class through a defined path
+     * Gets the namespace of a class through a defined path.
      *
-     * @param string $file [File path]
+     * @param string $file      [File path]
      * @param string $namespace [Namespace for the file]
-     * @param string $split [Separator to obtain the namespace]
+     * @param string $split     [Separator to obtain the namespace]
      *
      * @return string
      */
@@ -79,18 +77,18 @@ class Container
     {
         $splitFile = explode($split, $file);
 
-        $namespace = str_replace("/", "\\", "{$namespace}{$splitFile[1]}");
+        $namespace = str_replace('/', '\\', "{$namespace}{$splitFile[1]}");
 
-        $namespace = str_replace('.php', '',  $namespace);
+        $namespace = str_replace('.php', '', $namespace);
 
         return trim($namespace);
     }
 
     /**
-     * Gets the parameters of a function
+     * Gets the parameters of a function.
      *
      * @param ReflectionFunctionAbstract $method [Method obtained]
-     * @param array $params [Array of defined parameters]
+     * @param array                      $params [Array of defined parameters]
      *
      * @return array
      */
@@ -120,11 +118,11 @@ class Container
     }
 
     /**
-     * Inject dependencies into a method of a class
+     * Inject dependencies into a method of a class.
      *
      * @param object $object [Class object]
      * @param string $method [Method name]
-     * @param array $params [Array of defined parameters]
+     * @param array  $params [Array of defined parameters]
      *
      * @return mixed
      */
@@ -136,10 +134,10 @@ class Container
     }
 
     /**
-     * Inject dependencies to a callback
+     * Inject dependencies to a callback.
      *
      * @param Closure $closure [Defined callback]
-     * @param array $params [Array of defined parameters]
+     * @param array   $params  [Array of defined parameters]
      *
      * @return mixed
      */
@@ -152,10 +150,10 @@ class Container
 
     /**
      * Inject dependencies to methods of a class that have the annotation
-     * 'required'
+     * 'required'.
      *
      * @param object $object [Class object]
-     * @param array $params [Array of defined parameters]
+     * @param array  $params [Array of defined parameters]
      *
      * @return object
      */
@@ -175,10 +173,10 @@ class Container
     }
 
     /**
-     * Gets the data type of the parameters obtained
+     * Gets the data type of the parameters obtained.
      *
      * @param ReflectionParameter $parameter [Defined parameter of type
-     * ReflectionParameter]
+     *                                       ReflectionParameter]
      *
      * @return null|string
      */

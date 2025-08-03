@@ -26,7 +26,7 @@ class ContainerTest extends Test
         '/var/www/html/tests/Provider/CustomClass.php',
         '/var/www/html/tests/Provider/ExtendsProvider.php',
         '/var/www/html/tests/Provider/FactoryProvider.php',
-        '/var/www/html/tests/Provider/SubClassProvider.php'
+        '/var/www/html/tests/Provider/SubClassProvider.php',
     ];
     const REFLECTION_PARAMETERS = [CustomClass::class, 'setFactoryProvider'];
 
@@ -95,7 +95,7 @@ class ContainerTest extends Test
             'getParameters',
             [
                 new ReflectionMethod(new CustomClass(), 'setMultiple'),
-                ['str' => self::DEFAULT_VALUE]
+                ['str' => self::DEFAULT_VALUE],
             ]
         );
 
@@ -172,7 +172,7 @@ class ContainerTest extends Test
     public function testInjectDependenciesWithSubDependencies(): void
     {
         /** @var ClassProvider $classProvider */
-        $classProvider = $this->container->injectDependencies(new ClassProvider);
+        $classProvider = $this->container->injectDependencies(new ClassProvider());
 
         $str = $classProvider
             ->getSubClassProvider()

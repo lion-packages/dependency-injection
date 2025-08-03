@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Provider;
 
-use Tests\Provider\ExtendsProvider;
-use Tests\Provider\SubClassProvider;
-
 class ClassProvider extends ExtendsProvider
 {
     private SubClassProvider $subClassProvider;
