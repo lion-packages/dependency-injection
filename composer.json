@@ -3,6 +3,16 @@
     "description": "Container for dependency injection with DI-PHP",
     "type": "library",
     "license": "MIT",
+    "homepage": "https://dev.lion-packages.com",
+    "keywords": [
+        "lion",
+        "dependency-injection",
+        "lion-dependency-injection"
+    ],
+    "support": {
+        "issues": "https://github.com/lion-packages/dependency-injection/issues",
+        "source": "https://github.com/lion-packages/dependency-injection"
+    },
     "autoload": {
         "psr-4": {
             "Lion\\Dependency\\Injection\\": "src/DependencyInjection/"
