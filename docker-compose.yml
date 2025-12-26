@@ -1,13 +1,14 @@
 services:
-  app:
-    container_name: dependency-injection-app
+  php:
+    container_name: dependency-injection-php
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - 8000:8000
     volumes:
       - ./:/var/www/html
+
 networks:
   lion:
     driver: bridge
